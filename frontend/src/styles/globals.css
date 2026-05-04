@@ -1,0 +1,263 @@
+@custom-variant dark (&:is(.dark *));
+
+/* ========================================
+   Edu-Sync Design System v2
+   Vibrant, modern, animated
+   ======================================== */
+
+/* Switzer Font — from user-provided files */
+@font-face {
+  font-family: 'Switzer';
+  src: url('/fonts/Switzer_Complete/Fonts/WEB/fonts/Switzer-Regular.woff2') format('woff2'),
+       url('/fonts/Switzer_Complete/Fonts/WEB/fonts/Switzer-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Switzer';
+  src: url('/fonts/Switzer_Complete/Fonts/WEB/fonts/Switzer-Medium.woff2') format('woff2'),
+       url('/fonts/Switzer_Complete/Fonts/WEB/fonts/Switzer-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Switzer';
+  src: url('/fonts/Switzer_Complete/Fonts/WEB/fonts/Switzer-Semibold.woff2') format('woff2'),
+       url('/fonts/Switzer_Complete/Fonts/WEB/fonts/Switzer-Semibold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Switzer';
+  src: url('/fonts/Switzer_Complete/Fonts/WEB/fonts/Switzer-Bold.woff2') format('woff2'),
+       url('/fonts/Switzer_Complete/Fonts/WEB/fonts/Switzer-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Switzer';
+  src: url('/fonts/Switzer_Complete/Fonts/WEB/fonts/Switzer-Extrabold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-size: 16px;
+
+  /* ── Vibrant Edu-Sync Palette ── */
+  --es-indigo: #4F46E5;
+  --es-violet: #7C3AED;
+  --es-blue: #3B82F6;
+  --es-cyan: #06B6D4;
+  --es-emerald: #10B981;
+  --es-amber: #F59E0B;
+  --es-rose: #F43F5E;
+  --es-coral: #FB7185;
+  --es-orange: #F97316;
+
+  /* Neutrals */
+  --es-white: #FFFFFF;
+  --es-ghost: #F8FAFC;
+  --es-cloud: #F1F5F9;
+  --es-silver: #E2E8F0;
+  --es-gray: #94A3B8;
+  --es-slate: #64748B;
+  --es-dark: #1E293B;
+  --es-midnight: #0F172A;
+
+  /* Semantic mappings */
+  --background: var(--es-ghost);
+  --foreground: var(--es-dark);
+  --card: var(--es-white);
+  --card-foreground: var(--es-dark);
+  --popover: var(--es-white);
+  --popover-foreground: var(--es-dark);
+  --primary: var(--es-indigo);
+  --primary-foreground: #ffffff;
+  --secondary: var(--es-cloud);
+  --secondary-foreground: var(--es-dark);
+  --muted: var(--es-cloud);
+  --muted-foreground: var(--es-slate);
+  --accent: var(--es-cloud);
+  --accent-foreground: var(--es-dark);
+  --destructive: var(--es-rose);
+  --destructive-foreground: #ffffff;
+  --border: var(--es-silver);
+  --input: transparent;
+  --input-background: var(--es-cloud);
+  --switch-background: var(--es-silver);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: var(--es-indigo);
+  --chart-1: var(--es-indigo);
+  --chart-2: var(--es-emerald);
+  --chart-3: var(--es-violet);
+  --chart-4: var(--es-amber);
+  --chart-5: var(--es-rose);
+  --radius: 0.625rem;
+  --sidebar: var(--es-white);
+  --sidebar-foreground: var(--es-dark);
+  --sidebar-primary: var(--es-indigo);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--es-cloud);
+  --sidebar-accent-foreground: var(--es-dark);
+  --sidebar-border: var(--es-silver);
+  --sidebar-ring: var(--es-indigo);
+}
+
+.dark {
+  --background: #0f1214;
+  --foreground: #F8FAFC;
+  --card: #1a1d20;
+  --card-foreground: #F8FAFC;
+  --popover: #1a1d20;
+  --popover-foreground: #F8FAFC;
+  --primary: #818CF8;
+  --primary-foreground: #0F172A;
+  --secondary: #2a2d30;
+  --secondary-foreground: #F8FAFC;
+  --muted: #2a2d30;
+  --muted-foreground: #94A3B8;
+  --accent: #2a2d30;
+  --accent-foreground: #F8FAFC;
+  --destructive: #F43F5E;
+  --destructive-foreground: #fca5a5;
+  --border: #2a2d30;
+  --input: #2a2d30;
+  --ring: #818CF8;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Switzer', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+html {
+  font-size: var(--font-size);
+  scroll-behavior: smooth;
+}
+
+:focus-visible {
+  outline: 2px solid var(--es-indigo);
+  outline-offset: 2px;
+}
+
+::selection {
+  background-color: rgba(79, 70, 229, 0.15);
+  color: var(--es-dark);
+}
+
+/* Animated gradient backgrounds */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-12px) rotate(2deg); }
+  66% { transform: translateY(6px) rotate(-1deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(79, 70, 229, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(124, 58, 237, 0.5); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
