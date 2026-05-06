@@ -138,17 +138,17 @@ export function StudentRegistrationPage({ onBack, onSuccess }: StudentRegistrati
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 p-4 sm:p-6">
-      <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-amber-100/40 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-orange-100/30 blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 p-4 sm:p-6 relative overflow-hidden">
+      <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-amber-100/40 blur-3xl pointer-events-none z-0" />
+      <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-orange-100/30 blur-3xl pointer-events-none z-0" />
       <div className="max-w-2xl mx-auto relative z-10">
         {/* Header */}
         <motion.div className="mb-6" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <motion.button onClick={onBack} className="flex items-center gap-2 text-sm text-slate-500 hover:text-amber-600 mb-4 transition-colors" whileHover={{ x: -3 }}>
             <ArrowLeft className="w-4 h-4" /> Back to Login
           </motion.button>
-          <Card className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-xl shadow-amber-500/20 overflow-hidden">
-            <div className="absolute inset-0 opacity-10">
+          <Card className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-xl shadow-amber-500/20 overflow-hidden relative">
+            <div className="absolute inset-0 opacity-10 pointer-events-none">
               <svg width="100%" height="100%"><defs><pattern id="sr" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="white"/></pattern></defs><rect width="100%" height="100%" fill="url(#sr)"/></svg>
             </div>
             <CardHeader className="text-center relative">
