@@ -36,8 +36,23 @@ exports.getDepartmentById = async (req, res) => {
 
 exports.getFaculty = async (req, res) => {
   try {
-    const faculty = await Faculty.find({ isTerminated: { $ne: true } }).populate('departmentId', 'name fullName').lean();
+    const faculty = await Faculty.find({ isTerminated: { $ne: true } })
+      .populate('departmentId', 'name fullName')
+      .populate('userId', 'username email role')
+      .lean();
     sendSuccess(res, { faculty });
+  } catch (err) { sendError(res, err.message); }
+};
+
+// GET /api/v1/principal/ex-employees
+exports.getExEmployees = async (req, res) => {
+  try {
+    const exEmployees = await Faculty.find({ isTerminated: true })
+      .populate('departmentId', 'name fullName')
+      .populate('userId', 'username email')
+      .sort({ terminatedAt: -1 })
+      .lean();
+    sendSuccess(res, { exEmployees });
   } catch (err) { sendError(res, err.message); }
 };
 

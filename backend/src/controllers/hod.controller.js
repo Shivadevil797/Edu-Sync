@@ -24,8 +24,23 @@ exports.getFaculty = async (req, res) => {
   try {
     const hodFaculty = await Faculty.findOne({ userId: req.user._id });
     if (!hodFaculty) return sendError(res, 'HOD profile not found', 404);
-    const faculty = await Faculty.find({ departmentId: hodFaculty.departmentId }).populate('userId', 'username email').lean();
+    const faculty = await Faculty.find({ departmentId: hodFaculty.departmentId, isTerminated: { $ne: true } })
+      .populate('userId', 'username email role')
+      .lean();
     sendSuccess(res, { faculty });
+  } catch (err) { sendError(res, err.message); }
+};
+
+// GET /api/v1/hod/ex-employees — ex-employees in HOD's department
+exports.getExEmployees = async (req, res) => {
+  try {
+    const hodFaculty = await Faculty.findOne({ userId: req.user._id });
+    if (!hodFaculty) return sendError(res, 'HOD profile not found', 404);
+    const exEmployees = await Faculty.find({ departmentId: hodFaculty.departmentId, isTerminated: true })
+      .populate('userId', 'username email')
+      .sort({ terminatedAt: -1 })
+      .lean();
+    sendSuccess(res, { exEmployees });
   } catch (err) { sendError(res, err.message); }
 };
 

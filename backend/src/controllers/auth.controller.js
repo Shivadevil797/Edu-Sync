@@ -37,6 +37,21 @@ exports.login = async (req, res) => {
     user.lastLogin = new Date();
     await user.save();
 
+    // Resolve fullName from Faculty or Student record
+    let fullName = user.username;
+    if (['faculty', 'hod'].includes(user.role)) {
+      const Faculty = require('../models/Faculty');
+      const fac = await Faculty.findOne({ userId: user._id }).lean();
+      if (fac) fullName = fac.fullName;
+    } else if (user.role === 'student') {
+      const stu = await Student.findOne({ userId: user._id }).lean();
+      if (stu) fullName = `${stu.firstName} ${stu.lastName}`;
+    } else if (user.role === 'admin') {
+      fullName = 'Admin';
+    } else if (user.role === 'principal') {
+      fullName = 'Principal';
+    }
+
     const { accessToken, refreshToken } = generateTokens(user._id);
     setCookies(res, accessToken, refreshToken);
 
@@ -44,7 +59,7 @@ exports.login = async (req, res) => {
       message: 'Login successful',
       accessToken,
       refreshToken,
-      user: { id: user._id, username: user.username, email: user.email, role: user.role },
+      user: { id: user._id, username: user.username, email: user.email, role: user.role, fullName },
     });
   } catch (err) {
     sendError(res, err.message);
@@ -101,12 +116,17 @@ exports.register = async (req, res) => {
     const joiningYear = yearOfJoining || new Date().getFullYear();
     const registerNumber = await generateRegisterNumber(dept.name, joiningYear);
 
-    // Create student record
+    // Create student record with all fields
+    const address = req.body.address || '';
+    const semester = parseInt(req.body.semester) || 1;
+
     const student = await Student.create({
       userId: user._id,
       registerNumber,
       firstName, lastName, dateOfBirth, gender, phone,
+      address,
       departmentId: dept._id,
+      semester,
       section: section || 'A',
       yearOfJoining: joiningYear,
       yearOfPassing: joiningYear + 3,
@@ -121,7 +141,7 @@ exports.register = async (req, res) => {
     sendSuccess(res, {
       message: 'Registration successful',
       accessToken, refreshToken,
-      user: { id: user._id, username: user.username, email: user.email, role: 'student' },
+      user: { id: user._id, username: user.username, email: user.email, role: 'student', fullName: `${firstName} ${lastName}` },
       student: { registerNumber: student.registerNumber, firstName, lastName },
     }, 201);
   } catch (err) {
@@ -237,7 +257,7 @@ exports.registerStaff = async (req, res) => {
     sendSuccess(res, {
       message: 'Registration successful',
       accessToken, refreshToken,
-      user: { id: user._id, username: user.username, email: user.email, role: staffRole },
+      user: { id: user._id, username: user.username, email: user.email, role: staffRole, fullName: faculty.fullName },
       faculty: { employeeId: faculty.employeeId, fullName: faculty.fullName },
     }, 201);
   } catch (err) {

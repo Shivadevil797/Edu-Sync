@@ -17,7 +17,15 @@ exports.getTimetable = async (req, res) => {
   try {
     const faculty = await Faculty.findOne({ userId: req.user._id });
     if (!faculty) return sendError(res, 'Faculty profile not found', 404);
-    const timetables = await Timetable.find({ 'slots.facultyId': faculty._id }).lean();
+
+    // Match by facultyId OR by facultyName (fallback for pre-existing timetables)
+    const timetables = await Timetable.find({
+      $or: [
+        { 'slots.facultyId': faculty._id },
+        { 'slots.facultyName': { $regex: new RegExp(faculty.fullName, 'i') } },
+      ],
+    }).lean();
+
     sendSuccess(res, { timetables });
   } catch (err) { sendError(res, err.message); }
 };

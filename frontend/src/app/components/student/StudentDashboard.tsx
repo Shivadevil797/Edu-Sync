@@ -13,6 +13,8 @@ import {
   ClipboardList,
 } from 'lucide-react'
 
+import { getUser } from '@/services/api'
+
 interface StudentDashboardProps {
   onBack: () => void
   onNavigate: (page: string) => void
@@ -29,27 +31,9 @@ const fadeUp = {
 export function StudentDashboard({ onBack, onNavigate }: StudentDashboardProps) {
   const [activeTab, setActiveTab] = useState('home')
 
-  const studentData = {
-    name: 'Student User',
-    rollNumber: 'STU2024001',
-    course: 'BCA',
-    semester: '5th Semester',
-    email: 'student@college.edu',
-    phone: '+91 98765 43210',
-  }
-
-  // Try to load from localStorage (set by login)
-  const storedUser = (() => {
-    try {
-      const data = localStorage.getItem('studentData')
-      if (data) return JSON.parse(data)
-    } catch { /* empty */ }
-    return null
-  })()
-
-  const displayName = storedUser?.firstName
-    ? `${storedUser.firstName} ${storedUser.lastName || ''}`
-    : studentData.name
+  // Load user data from login/registration (stored by api.ts setUser)
+  const user = getUser()
+  const displayName = user?.fullName || user?.username || 'Student'
 
   const navItems = [
     { id: 'academic-timetable', icon: Calendar, label: 'Academic Timetable', description: 'View your daily class schedule and timings', accent: '#1E2022' },
@@ -78,9 +62,9 @@ export function StudentDashboard({ onBack, onNavigate }: StudentDashboardProps) 
                 name: displayName,
                 role: 'Student',
                 photo: '',
-                email: storedUser?.emailId || studentData.email,
-                phone: storedUser?.mobileNumber || studentData.phone,
-                department: storedUser?.course || studentData.course,
+                email: user?.email || '',
+                phone: '',
+                department: '',
               }}
             />
             <Button
@@ -111,8 +95,8 @@ export function StudentDashboard({ onBack, onNavigate }: StudentDashboardProps) 
                 <DefaultAvatar name={displayName} size="lg" />
                 <div>
                   <h2 className="text-xl font-semibold text-[#1E2022]">{displayName}</h2>
-                  <p className="text-sm text-[#52616B]">{storedUser?.course || studentData.course} · {storedUser?.semester || studentData.semester}</p>
-                  <p className="text-xs text-[#C9D6DF] mt-1">ID: {storedUser?.rollNumber || studentData.rollNumber}</p>
+                  <p className="text-sm text-[#52616B]">{user?.role === 'student' ? 'Student' : ''}</p>
+                  <p className="text-xs text-[#C9D6DF] mt-1">{user?.email || ''}</p>
                 </div>
               </div>
             </div>

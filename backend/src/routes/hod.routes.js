@@ -7,6 +7,7 @@ router.use(authenticate, authorize('hod'));
 
 router.get('/dashboard', hod.getDashboard);
 router.get('/faculty', hod.getFaculty);
+router.get('/ex-employees', hod.getExEmployees);
 router.get('/timetable', hod.getTimetable);
 router.put('/timetable/:id', hod.updateTimetable);
 router.post('/syllabus', upload.single('file'), hod.uploadSyllabus);
