@@ -355,8 +355,8 @@ export async function apiGetExEmployees() {
   return apiFetch('/admin/staff/ex-employees');
 }
 
-export async function apiDeleteStaff(staffId: string, reason?: string) {
-  return apiFetch(`/admin/staff/${staffId}`, {
+export async function apiDeleteStaff(facultyId: string, reason?: string) {
+  return apiFetch(`/admin/staff/${facultyId}`, {
     method: 'DELETE',
     body: JSON.stringify({ reason: reason || 'Removed by admin' }),
   });
@@ -373,5 +373,11 @@ export async function apiGetPrincipalStudents(params?: {
   if (params?.department) searchParams.append('department', params.department);
   const query = searchParams.toString();
   return apiFetch(`/principal/students${query ? `?${query}` : ''}`);
+}
+
+// ─── Principal Faculty API ───
+
+export async function apiGetPrincipalFaculty() {
+  return apiFetch('/principal/faculty');
 }
 

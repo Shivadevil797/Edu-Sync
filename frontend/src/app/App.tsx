@@ -209,7 +209,7 @@ export default function App() {
       case 'admin-dashboard':
         return <AdminDashboard onBack={handleBack} onNavigate={handleAdminNavigation} />
       case 'admin-faculty-list':
-        return <FacultyListPage onBack={handleBack} />
+        return <FacultyListPage onBack={handleBack} userRole="admin" />
       case 'login':
         return <LoginPage onBack={handleBack} onLoginSuccess={handleLoginSuccess} />
       case 'hod-login':
@@ -243,7 +243,7 @@ export default function App() {
       case 'principal-student-affairs':
         return <PrincipalStudentAffairs onBack={handleBack} />
       case 'principal-faculty-management':
-        return <FacultyListPage onBack={handleBack} />
+        return <FacultyListPage onBack={handleBack} userRole="principal" />
       case 'departments':
         return <DepartmentsPage onBack={handleBack} onDepartmentClick={handleDepartmentClick} />
       case 'department-detail':
