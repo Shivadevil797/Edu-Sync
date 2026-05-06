@@ -290,6 +290,65 @@ export async function apiGetStudentExamTimetable() {
   return apiFetch('/student/timetable/exam');
 }
 
+// ─── Faculty Dashboard API ───
+
+export async function apiGetFacultyDashboard() {
+  return apiFetch('/faculty/dashboard');
+}
+
+export async function apiGetFacultyLeaveRequests() {
+  return apiFetch('/faculty/leave-requests');
+}
+
+export async function apiSubmitFacultyLeave(leaveData: {
+  leaveType: string;
+  startDate: string;
+  endDate: string;
+  reason: string;
+}) {
+  return apiFetch('/faculty/leave-request', {
+    method: 'POST',
+    body: JSON.stringify(leaveData),
+  });
+}
+
+// ─── HOD Dashboard API ───
+
+export async function apiGetHODDashboard() {
+  return apiFetch('/hod/dashboard');
+}
+
+export async function apiGetHODFaculty() {
+  return apiFetch('/hod/faculty');
+}
+
+export async function apiGetHODLeaveRequests() {
+  return apiFetch('/hod/leave-requests');
+}
+
+export async function apiReviewHODLeave(leaveId: string, status: 'approved' | 'rejected') {
+  return apiFetch(`/hod/leave-requests/${leaveId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function apiSubmitHODLeave(leaveData: {
+  leaveType: string;
+  startDate: string;
+  endDate: string;
+  reason: string;
+}) {
+  return apiFetch('/hod/leave-request', {
+    method: 'POST',
+    body: JSON.stringify(leaveData),
+  });
+}
+
+export async function apiGetHODExEmployees() {
+  return apiFetch('/hod/ex-employees');
+}
+
 // ─── Ex-Employees API ───
 
 export async function apiGetExEmployees() {

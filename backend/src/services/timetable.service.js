@@ -121,16 +121,18 @@ async function generateTimetables(workloadDoc, userId) {
     let dept = await Department.findOne({ name: group.department });
     if (!dept) {
       const isBCA = group.department === 'BCA';
+      const isLanguage = ['ENGLISH', 'KANNADA', 'HINDI', 'SANSKRIT'].includes(group.department);
       dept = await Department.create({
         name: group.department,
         fullName: group.department,
-        weeklyHoursRule: isBCA ? 20 : 16,
+        weeklyHoursRule: isBCA ? 20 : isLanguage ? 18 : 16,
         labHoursRule: isBCA ? 12 : 0,
-        theoryHoursRule: isBCA ? 8 : 16,
+        theoryHoursRule: isBCA ? 8 : isLanguage ? 18 : 16,
       });
     }
 
     const isBCA = group.department === 'BCA';
+    const isLanguage = ['ENGLISH', 'KANNADA', 'HINDI', 'SANSKRIT'].includes(group.department);
     const slots = [];
     const classSlots = {}; // "day-period" → true
 
@@ -156,7 +158,7 @@ async function generateTimetables(workloadDoc, userId) {
         }
       }
 
-      // Calculate hours
+      // Calculate hours based on department type
       let theoryHours, labHours;
       if (isBCA && labSubjects.length > 0) {
         labHours = Math.min(12, teacher.weeklyHours > 8 ? teacher.weeklyHours - 8 : Math.floor(teacher.weeklyHours / 2));
@@ -165,7 +167,12 @@ async function generateTimetables(workloadDoc, userId) {
         // All theory for this teacher
         theoryHours = teacher.weeklyHours;
         labHours = 0;
+      } else if (isLanguage) {
+        // Language departments: all theory, no lab (18 hrs/week)
+        theoryHours = teacher.weeklyHours || dept.weeklyHoursRule || 18;
+        labHours = 0;
       } else {
+        // Commerce departments (BBA, BCOM) — all theory
         theoryHours = teacher.weeklyHours || dept.weeklyHoursRule;
         labHours = 0;
       }
