@@ -290,6 +290,10 @@ export async function apiGetStudentExamTimetable() {
   return apiFetch('/student/timetable/exam');
 }
 
+export async function apiGetStudentProfile() {
+  return apiFetch('/student/profile');
+}
+
 // ─── Faculty Dashboard API ───
 
 export async function apiGetFacultyDashboard() {

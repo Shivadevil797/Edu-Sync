@@ -29,12 +29,31 @@ exports.getAcademicTimetable = async (req, res) => {
     if (!student) return sendError(res, 'Student not found', 404);
 
     const yearInCourse = student.semester ? Math.ceil(student.semester / 2) : 1;
-    const timetables = await Timetable.find({
+
+    // Primary query: exact match on department, year, section
+    let timetables = await Timetable.find({
       departmentId: student.departmentId,
       type: 'academic',
       year: yearInCourse,
       section: student.section || 'A',
-    }).lean();
+    }).populate('departmentId', 'name fullName').lean();
+
+    // Fallback 1: match department + year only (any section)
+    if (timetables.length === 0) {
+      timetables = await Timetable.find({
+        departmentId: student.departmentId,
+        type: 'academic',
+        year: yearInCourse,
+      }).populate('departmentId', 'name fullName').lean();
+    }
+
+    // Fallback 2: match department only (all academic timetables for the department)
+    if (timetables.length === 0) {
+      timetables = await Timetable.find({
+        departmentId: student.departmentId,
+        type: 'academic',
+      }).populate('departmentId', 'name fullName').lean();
+    }
 
     sendSuccess(res, { timetables });
   } catch (err) { sendError(res, err.message); }
@@ -49,7 +68,7 @@ exports.getExamTimetable = async (req, res) => {
       departmentId: student.departmentId,
       type: 'exam',
       isPublished: true,
-    }).lean();
+    }).populate('departmentId', 'name fullName').lean();
 
     sendSuccess(res, { timetables });
   } catch (err) { sendError(res, err.message); }
