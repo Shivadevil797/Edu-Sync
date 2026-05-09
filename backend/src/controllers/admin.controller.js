@@ -265,6 +265,21 @@ exports.publishTimetable = async (req, res) => {
   } catch (err) { sendError(res, err.message); }
 };
 
+// DELETE /api/v1/admin/timetable/:id
+exports.deleteTimetable = async (req, res) => {
+  try {
+    const tt = await Timetable.findById(req.params.id);
+    if (!tt) return sendError(res, 'Timetable not found', 404);
+    await Timetable.findByIdAndDelete(req.params.id);
+    // Clean up any adjusted timetable docs referencing this timetable's department+year+section
+    try {
+      const AdjustedTimetable = require('../models/AdjustedTimetable');
+      await AdjustedTimetable.deleteMany({ departmentId: tt.departmentId, year: tt.year, section: tt.section });
+    } catch { /* AdjustedTimetable model may not exist yet */ }
+    sendSuccess(res, { message: 'Timetable deleted successfully' });
+  } catch (err) { sendError(res, err.message); }
+};
+
 // GET /api/v1/admin/profile
 exports.getProfile = async (req, res) => {
   try { sendSuccess(res, { user: req.user }); }

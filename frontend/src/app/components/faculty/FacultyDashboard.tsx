@@ -8,6 +8,7 @@ import {
   apiGetFacultyTimetables,
   apiGetFacultyLeaveRequests,
   apiSubmitFacultyLeave,
+  apiGetFacultyAdjustedTimetable,
 } from '@/services/api'
 import {
   LogOut,
@@ -21,6 +22,11 @@ import {
   Loader2,
   AlertTriangle,
   X,
+  ArrowRightLeft,
+  UserX,
+  UserCheck,
+  XCircle,
+  MapPin,
 } from 'lucide-react'
 
 interface FacultyDashboardProps {
@@ -50,7 +56,7 @@ interface TimetableSlot {
 }
 
 export function FacultyDashboard({ onBack }: FacultyDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'home' | 'leave' | 'timetable'>('home')
+  const [activeTab, setActiveTab] = useState<'home' | 'leave' | 'timetable' | 'adjusted'>('home')
   const [currentDate, setCurrentDate] = useState(new Date())
 
   // API state
@@ -64,6 +70,11 @@ export function FacultyDashboard({ onBack }: FacultyDashboardProps) {
   const [showLeaveForm, setShowLeaveForm] = useState(false)
   const [leaveForm, setLeaveForm] = useState({ leaveType: 'Casual', startDate: '', endDate: '', reason: '' })
   const [isSubmittingLeave, setIsSubmittingLeave] = useState(false)
+
+  // Adjusted timetable state
+  const [adjustedData, setAdjustedData] = useState<any[]>([])
+  const [adjustedLoading, setAdjustedLoading] = useState(false)
+  const [adjustedFetched, setAdjustedFetched] = useState(false)
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentDate(new Date()), 60000)
@@ -113,6 +124,17 @@ export function FacultyDashboard({ onBack }: FacultyDashboardProps) {
     }
     fetchData()
   }, [])
+
+  // Fetch adjusted timetable when tab is selected
+  useEffect(() => {
+    if (activeTab === 'adjusted' && !adjustedFetched) {
+      setAdjustedLoading(true)
+      apiGetFacultyAdjustedTimetable()
+        .then(res => { setAdjustedData(res.adjustedTimetables || []); setAdjustedFetched(true) })
+        .catch(() => { setAdjustedData([]); setAdjustedFetched(true) })
+        .finally(() => setAdjustedLoading(false))
+    }
+  }, [activeTab, adjustedFetched])
 
   // Derived data from timetable slots
   const todayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' })
@@ -355,6 +377,103 @@ export function FacultyDashboard({ onBack }: FacultyDashboardProps) {
     <FacultyTimetablePage onBack={() => setActiveTab('home')} department={faculty?.department || ''} />
   )
 
+  const renderAdjustedContent = () => {
+
+    if (adjustedLoading) {
+      return (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-6 h-6 animate-spin text-amber-500 mr-3" />
+          <span className="text-gray-600">Loading adjusted timetables...</span>
+        </div>
+      )
+    }
+
+    if (adjustedData.length === 0) {
+      return (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <ArrowRightLeft className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">No Adjustments</h3>
+            <p className="text-sm text-gray-500">No schedule adjustments involving you at this time.</p>
+          </CardContent>
+        </Card>
+      )
+    }
+
+    const grouped = adjustedData.reduce((acc: any, item: any) => {
+      const dateKey = new Date(item.date).toLocaleDateString('en-IN', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+      })
+      if (!acc[dateKey]) acc[dateKey] = []
+      acc[dateKey].push(item)
+      return acc
+    }, {})
+
+    return (
+      <div>
+        <div className="mb-6">
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <ArrowRightLeft className="w-5 h-5" /> Adjusted Timetable
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">Your schedule changes and substitution duties</p>
+        </div>
+        <div className="space-y-6">
+          {Object.entries(grouped).map(([dateLabel, items]: [string, any]) => (
+            <div key={dateLabel} className="space-y-3">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="w-4 h-4 text-amber-500" />
+                <h3 className="font-semibold text-gray-800">{dateLabel}</h3>
+              </div>
+              {items.map((item: any) => (
+                <Card key={item._id} className="overflow-hidden border-0 shadow-md">
+                  <div className="bg-gradient-to-r from-red-500 to-rose-500 px-4 py-3">
+                    <div className="flex items-center gap-2 text-white">
+                      <UserX className="w-5 h-5" />
+                      <span className="font-semibold">{item.absentFacultyName} is on leave</span>
+                      <Badge className="bg-white/20 text-white ml-auto text-xs">{item.leaveType || 'Leave'}</Badge>
+                    </div>
+                  </div>
+                  <CardContent className="p-0">
+                    {item.adjustedSlots?.sort((a: any, b: any) => a.period - b.period).map((slot: any, idx: number) => (
+                      <div key={idx} className={`flex items-center gap-4 px-4 py-3 border-b last:border-b-0 ${
+                        slot.status === 'cancelled' ? 'bg-red-50/50' : 'bg-teal-50/50'
+                      }`}>
+                        <div className="text-xs text-gray-500 w-20">
+                          <Clock className="w-3 h-3 inline mr-1" />
+                          {slot.timeStart}–{slot.timeEnd}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-sm text-gray-800">{slot.subject || 'N/A'}</div>
+                          <div className="flex items-center gap-3 text-xs mt-0.5">
+                            <span className="text-gray-400 line-through">{slot.originalFacultyName}</span>
+                            {slot.status === 'substituted' && slot.substituteFacultyName && (
+                              <>
+                                <span className="text-gray-400">→</span>
+                                <span className="text-teal-700 font-semibold flex items-center gap-1">
+                                  <UserCheck className="w-3 h-3" /> {slot.substituteFacultyName}
+                                </span>
+                              </>
+                            )}
+                            {slot.status === 'cancelled' && (
+                              <span className="text-red-600 font-medium flex items-center gap-1">
+                                <XCircle className="w-3 h-3" /> No substitute
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {slot.room && <div className="text-xs text-gray-400 flex items-center gap-1"><MapPin className="w-3 h-3" />{slot.room}</div>}
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Header */}
@@ -396,6 +515,10 @@ export function FacultyDashboard({ onBack }: FacultyDashboardProps) {
             className={`flex items-center gap-2 ${activeTab === 'timetable' ? 'border-b-2 border-blue-600 rounded-none' : ''}`}>
             <CalendarIcon className="w-4 h-4" /> Timetable
           </Button>
+          <Button variant={activeTab === 'adjusted' ? 'default' : 'ghost'} size="sm" onClick={() => setActiveTab('adjusted')}
+            className={`flex items-center gap-2 ${activeTab === 'adjusted' ? 'border-b-2 border-amber-600 rounded-none' : ''}`}>
+            <ArrowRightLeft className="w-4 h-4" /> Adjusted
+          </Button>
         </div>
       </div>
 
@@ -405,6 +528,7 @@ export function FacultyDashboard({ onBack }: FacultyDashboardProps) {
           {activeTab === 'home' && renderHomeContent()}
           {activeTab === 'leave' && renderLeaveContent()}
           {activeTab === 'timetable' && renderTimetableContent()}
+          {activeTab === 'adjusted' && renderAdjustedContent()}
         </div>
       </div>
 

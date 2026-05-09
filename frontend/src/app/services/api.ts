@@ -178,6 +178,12 @@ export async function apiPublishTimetable(timetableId: string) {
   });
 }
 
+export async function apiDeleteTimetable(timetableId: string) {
+  return apiFetch(`/admin/timetable/${timetableId}`, {
+    method: 'DELETE',
+  });
+}
+
 // ─── Admin Staff API ───
 
 export async function apiGetStaff(params?: {
@@ -385,3 +391,20 @@ export async function apiGetPrincipalFaculty() {
   return apiFetch('/principal/faculty');
 }
 
+// ─── Adjusted Timetable API ───
+
+export async function apiGetStudentAdjustedTimetable() {
+  return apiFetch('/student/timetable/adjusted');
+}
+
+export async function apiGetFacultyAdjustedTimetable() {
+  return apiFetch('/faculty/adjusted-timetable');
+}
+
+export async function apiGetHODAdjustedTimetable() {
+  return apiFetch('/hod/adjusted-timetable');
+}
+
+export async function apiGetPrincipalAdjustedTimetable() {
+  return apiFetch('/principal/adjusted-timetable');
+}

@@ -9,5 +9,6 @@ router.get('/timetable', faculty.getTimetable);
 router.post('/leave-request', faculty.requestLeave);
 router.get('/leave-requests', faculty.getLeaveRequests);
 router.get('/syllabus', faculty.getSyllabi);
+router.get('/adjusted-timetable', faculty.getAdjustedTimetable);
 
 module.exports = router;

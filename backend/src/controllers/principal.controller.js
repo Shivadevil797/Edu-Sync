@@ -3,6 +3,7 @@ const Faculty = require('../models/Faculty');
 const Student = require('../models/Student');
 const Timetable = require('../models/Timetable');
 const LeaveRequest = require('../models/LeaveRequest');
+const AdjustedTimetable = require('../models/AdjustedTimetable');
 const { sendSuccess, sendError } = require('../utils/response');
 const { applyLeaveToTimetable, removeLeaveFromTimetable } = require('../services/leave.service');
 
@@ -130,4 +131,17 @@ exports.reviewLeaveRequest = async (req, res) => {
 exports.getProfile = async (req, res) => {
   try { sendSuccess(res, { user: req.user }); }
   catch (err) { sendError(res, err.message); }
+};
+
+exports.getAdjustedTimetable = async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const adjustedTimetables = await AdjustedTimetable.find({
+      date: { $gte: today },
+    }).populate('departmentId', 'name fullName').sort({ date: 1 }).lean();
+
+    sendSuccess(res, { adjustedTimetables });
+  } catch (err) { sendError(res, err.message); }
 };

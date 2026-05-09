@@ -2,6 +2,7 @@ const Faculty = require('../models/Faculty');
 const Timetable = require('../models/Timetable');
 const Syllabus = require('../models/Syllabus');
 const LeaveRequest = require('../models/LeaveRequest');
+const AdjustedTimetable = require('../models/AdjustedTimetable');
 const { sendSuccess, sendError } = require('../utils/response');
 
 exports.getDashboard = async (req, res) => {
@@ -61,5 +62,26 @@ exports.getSyllabi = async (req, res) => {
     if (!faculty) return sendError(res, 'Faculty profile not found', 404);
     const syllabi = await Syllabus.find({ departmentId: faculty.departmentId }).sort({ createdAt: -1 }).lean();
     sendSuccess(res, { syllabi });
+  } catch (err) { sendError(res, err.message); }
+};
+
+exports.getAdjustedTimetable = async (req, res) => {
+  try {
+    const faculty = await Faculty.findOne({ userId: req.user._id });
+    if (!faculty) return sendError(res, 'Faculty profile not found', 404);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Show adjustments where this faculty is absent OR is a substitute
+    const adjustedTimetables = await AdjustedTimetable.find({
+      $or: [
+        { absentFacultyId: faculty._id },
+        { 'adjustedSlots.substituteFacultyId': faculty._id },
+      ],
+      date: { $gte: today },
+    }).populate('departmentId', 'name fullName').sort({ date: 1 }).lean();
+
+    sendSuccess(res, { adjustedTimetables });
   } catch (err) { sendError(res, err.message); }
 };

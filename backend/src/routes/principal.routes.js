@@ -14,5 +14,6 @@ router.get('/leave-requests', principal.getLeaveRequests);
 router.put('/leave-requests/:id', principal.reviewLeaveRequest);
 router.get('/profile', principal.getProfile);
 router.get('/timetable', principal.getTimetable);
+router.get('/adjusted-timetable', principal.getAdjustedTimetable);
 
 module.exports = router;

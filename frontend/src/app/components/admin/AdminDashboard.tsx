@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { TimetableManagementModal } from './TimetableManagementModal'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { AvatarDropdown } from "@/components/common/AvatarDropdown"
+import { apiGetStudents, apiDeleteStudent } from '@/services/api'
 import {
   LogOut,
   UserPlus,
@@ -14,7 +15,9 @@ import {
   Search,
   Trash2,
   Calendar,
-  Upload
+  Upload,
+  Loader2,
+  AlertTriangle
 } from 'lucide-react'
 
 interface AdminDashboardProps {
@@ -48,18 +51,11 @@ export function AdminDashboard({ onBack, onNavigate }: AdminDashboardProps) {
     password: ''
   })
 
-  const [allStudents, setAllStudents] = useState([
-    { id: 1, name: 'Rahul Sharma', registerNo: 'BCA21001', department: 'BCA', email: 'rahul@student.edu', phone: '+91 98765 11111' },
-    { id: 2, name: 'Priya Patel', registerNo: 'BCA21002', department: 'BCA', email: 'priya@student.edu', phone: '+91 98765 22222' },
-    { id: 3, name: 'Amit Kumar', registerNo: 'BCOM21045', department: 'BCOM', email: 'amit@student.edu', phone: '+91 98765 33333' },
-    { id: 4, name: 'Sneha Reddy', registerNo: 'BCOM21046', department: 'BCOM', email: 'sneha@student.edu', phone: '+91 98765 44444' },
-    { id: 5, name: 'Vikram Singh', registerNo: 'BBA21023', department: 'BBA', email: 'vikram@student.edu', phone: '+91 98765 55555' },
-    { id: 6, name: 'Anita Desai', registerNo: 'BBA21024', department: 'BBA', email: 'anita@student.edu', phone: '+91 98765 66666' },
-    { id: 7, name: 'Ravi Verma', registerNo: 'BCAF21012', department: 'BCOM A&F', email: 'ravi@student.edu', phone: '+91 98765 77777' },
-    { id: 8, name: 'Divya Shah', registerNo: 'MCA21001', department: 'MCA', email: 'divya@student.edu', phone: '+91 98765 88888' },
-    { id: 9, name: 'Karan Joshi', registerNo: 'MBA21015', department: 'MBA', email: 'karan@student.edu', phone: '+91 98765 99999' },
-    { id: 10, name: 'Pooja Agarwal', registerNo: 'MCOM21008', department: 'MCOM', email: 'pooja@student.edu', phone: '+91 98765 10101' }
-  ])
+  const [allStudents, setAllStudents] = useState<any[]>([])
+  const [isLoadingStudents, setIsLoadingStudents] = useState(false)
+  const [studentError, setStudentError] = useState('')
+  const [totalStudents, setTotalStudents] = useState(0)
+  const [isDeletingStudent, setIsDeletingStudent] = useState<string | null>(null)
 
   const departments = [
     { id: 'BCA', name: 'BCA', color: 'from-blue-500 to-cyan-600' },
@@ -86,16 +82,59 @@ export function AdminDashboard({ onBack, onNavigate }: AdminDashboardProps) {
     totalCourses: courses.length
   }
 
+  // Fetch students from API when the modal opens
+  const fetchStudents = async (searchTerm?: string, dept?: string) => {
+    setIsLoadingStudents(true)
+    setStudentError('')
+    try {
+      const params: any = { limit: '100' }
+      if (searchTerm) params.search = searchTerm
+      if (dept) params.department = dept
+      const res = await apiGetStudents(params)
+      setAllStudents(res.students || [])
+      setTotalStudents(res.total || 0)
+    } catch (err: any) {
+      setStudentError(err.message || 'Failed to load students')
+      setAllStudents([])
+    } finally {
+      setIsLoadingStudents(false)
+    }
+  }
+
+  // Fetch when student records modal opens
+  useEffect(() => {
+    if (showStudentRecords) {
+      fetchStudents(studentSearch || undefined, selectedDepartment || undefined)
+    }
+  }, [showStudentRecords])
+
+  // Re-fetch when department filter or search changes
+  useEffect(() => {
+    if (showStudentRecords) {
+      const timer = setTimeout(() => {
+        fetchStudents(studentSearch || undefined, selectedDepartment || undefined)
+      }, 300) // debounce
+      return () => clearTimeout(timer)
+    }
+  }, [studentSearch, selectedDepartment])
+
   const handleCreatePrincipal = () => {
     alert(`Principal account created!\n\nName: ${principalForm.name}\nEmail: ${principalForm.email}\nPassword: ${principalForm.password}`)
     setShowCreatePrincipal(false)
     setPrincipalForm({ name: '', email: '', phone: '', password: '' })
   }
 
-  const handleDeleteStudent = (studentId: number, studentName: string) => {
-    if (window.confirm(`Are you sure you want to delete ${studentName}'s record? This action cannot be undone.`)) {
-      setAllStudents(prev => prev.filter(s => s.id !== studentId))
-      alert(`${studentName}'s record has been deleted successfully.`)
+  const handleDeleteStudent = async (studentId: string, studentName: string) => {
+    if (!window.confirm(`Are you sure you want to delete ${studentName}'s record? This action cannot be undone.`)) return
+    setIsDeletingStudent(studentId)
+    try {
+      await apiDeleteStudent(studentId)
+      // Refresh the list
+      fetchStudents(studentSearch || undefined, selectedDepartment || undefined)
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete student')
+    } finally {
+      setIsDeletingStudent(null)
     }
   }
 
@@ -124,17 +163,6 @@ export function AdminDashboard({ onBack, onNavigate }: AdminDashboardProps) {
     setSyllabusForm({ stream: '', year: '', file: null })
     setShowSyllabusUpload(false)
   }
-
-  const filteredStudents = selectedDepartment
-    ? allStudents.filter(s => s.department === selectedDepartment)
-    : allStudents.filter(s =>
-        s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-        s.registerNo.toLowerCase().includes(studentSearch.toLowerCase())
-      )
-
-  const totalStudents = allStudents.length
-  const activeStudents = allStudents.length
-  const graduatedStudents = 850
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
@@ -307,7 +335,7 @@ export function AdminDashboard({ onBack, onNavigate }: AdminDashboardProps) {
             </div>
             <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
               {/* Statistics */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Card>
                   <CardContent className="p-4 text-center">
                     <div className="text-2xl font-bold text-blue-600">{totalStudents}</div>
@@ -316,14 +344,8 @@ export function AdminDashboard({ onBack, onNavigate }: AdminDashboardProps) {
                 </Card>
                 <Card>
                   <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-green-600">{activeStudents}</div>
-                    <div className="text-xs text-gray-600">Active</div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-purple-600">{graduatedStudents}</div>
-                    <div className="text-xs text-gray-600">Graduated</div>
+                    <div className="text-2xl font-bold text-green-600">{allStudents.length}</div>
+                    <div className="text-xs text-gray-600">Showing</div>
                   </CardContent>
                 </Card>
               </div>
@@ -339,77 +361,82 @@ export function AdminDashboard({ onBack, onNavigate }: AdminDashboardProps) {
                 />
               </div>
 
-              {/* Department Cards */}
-              {!selectedDepartment && !studentSearch && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-4">Select Department</h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {departments.map((dept) => (
-                      <Card
-                        key={dept.id}
-                        className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
-                        onClick={() => setSelectedDepartment(dept.id)}
-                      >
-                        <CardContent className="p-4">
-                          <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${dept.color} flex items-center justify-center mx-auto mb-2`}>
-                            <GraduationCap className="w-6 h-6 text-white" />
-                          </div>
-                          <div className="text-center">
-                            <div className="font-semibold text-gray-900 text-sm">{dept.name}</div>
-                            <div className="text-xs text-gray-600">{allStudents.filter(s => s.department === dept.id).length} students</div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Department Filter Chips */}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant={!selectedDepartment ? 'default' : 'outline'}
+                  onClick={() => setSelectedDepartment(null)}
+                  className="text-xs"
+                >
+                  All Departments
+                </Button>
+                {departments.map((dept) => (
+                  <Button
+                    key={dept.id}
+                    size="sm"
+                    variant={selectedDepartment === dept.id ? 'default' : 'outline'}
+                    onClick={() => { setSelectedDepartment(dept.id); setStudentSearch(''); }}
+                    className="text-xs"
+                  >
+                    {dept.name}
+                  </Button>
+                ))}
+              </div>
 
-              {/* Student List */}
-              {(selectedDepartment || studentSearch) && (
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-semibold text-gray-900">
-                      {selectedDepartment ? `${selectedDepartment} Students` : 'Search Results'}
-                    </h4>
-                    {selectedDepartment && (
-                      <Button size="sm" variant="outline" onClick={() => setSelectedDepartment(null)}>
-                        View All Departments
-                      </Button>
-                    )}
-                  </div>
-                  <div className="space-y-3">
-                    {filteredStudents.map((student) => (
-                      <Card key={student.id}>
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="font-medium text-gray-900">{student.name}</div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-600 mt-1">
-                                <div><span className="font-medium">Register No:</span> {student.registerNo}</div>
-                                <div><span className="font-medium">Department:</span> {student.department}</div>
-                                <div><span className="font-medium">Email:</span> {student.email}</div>
-                                <div><span className="font-medium">Phone:</span> {student.phone}</div>
-                              </div>
+              {/* Loading / Error / Content */}
+              {isLoadingStudents ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-6 h-6 animate-spin text-blue-500 mr-3" />
+                  <span className="text-gray-600">Loading students...</span>
+                </div>
+              ) : studentError ? (
+                <div className="flex items-center justify-center py-12">
+                  <AlertTriangle className="w-6 h-6 text-red-400 mr-3" />
+                  <span className="text-red-600">{studentError}</span>
+                </div>
+              ) : allStudents.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <GraduationCap className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="font-medium">No students found</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {studentSearch || selectedDepartment ? 'Try a different search or filter' : 'No students registered yet'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {allStudents.map((student: any) => (
+                    <Card key={student._id}>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900">
+                              {student.firstName} {student.lastName}
                             </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => handleDeleteStudent(student.id, student.name)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-600 mt-1">
+                              <div><span className="font-medium">Register No:</span> {student.registerNumber || 'N/A'}</div>
+                              <div><span className="font-medium">Department:</span> {student.departmentId?.name || student.departmentId?.fullName || 'N/A'}</div>
+                              <div><span className="font-medium">Section:</span> {student.section || 'N/A'}</div>
+                              <div><span className="font-medium">Phone:</span> {student.phone || 'N/A'}</div>
+                            </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                    {filteredStudents.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        <p>No students found</p>
-                      </div>
-                    )}
-                  </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            disabled={isDeletingStudent === student._id}
+                            onClick={() => handleDeleteStudent(student._id, `${student.firstName} ${student.lastName}`)}
+                          >
+                            {isDeletingStudent === student._id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               )}
             </div>
