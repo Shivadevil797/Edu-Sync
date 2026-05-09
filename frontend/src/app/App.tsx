@@ -20,9 +20,10 @@ import { StudentDetailPage } from "@/components/student/StudentDetailPage"
 import { StudentSyllabusPage } from "@/components/student/StudentSyllabusPage"
 import { StudentTimetablePage } from "@/components/student/StudentTimetablePage"
 import { UnifiedTimetable } from "@/components/common/UnifiedTimetable"
+import { AdjustedTimetablePage } from "@/components/common/AdjustedTimetablePage"
 import { FacultyListPage } from "@/components/faculty/FacultyListPage"
 import { motion, AnimatePresence } from 'motion/react'
-import { clearToken } from '@/services/api'
+import { clearToken, apiGetStudentAdjustedTimetable, apiGetPrincipalAdjustedTimetable } from '@/services/api'
 
 type Screen =
   | 'role-selection'
@@ -30,8 +31,10 @@ type Screen =
   | 'login' | 'hod-login' | 'hod-registration' | 'faculty-login' | 'faculty-registration'
   | 'student-login' | 'student-registration' | 'student-dashboard' | 'student-details'
   | 'student-syllabus' | 'student-academic-timetable' | 'student-exam-timetable'
+  | 'student-adjusted-timetable'
   | 'hod-main-dashboard' | 'faculty-dashboard'
   | 'principal-dashboard' | 'principal-student-affairs' | 'principal-faculty-management'
+  | 'principal-adjusted-timetable'
   | 'departments' | 'department-detail' | 'timetable'
 
 export default function App() {
@@ -71,7 +74,7 @@ export default function App() {
   const getTransition = (screen: Screen) => {
     const dashboards = ['admin-dashboard', 'principal-dashboard', 'hod-main-dashboard', 'faculty-dashboard', 'student-dashboard']
     const logins = ['admin-login', 'login', 'hod-login', 'faculty-login', 'student-login']
-    const subPages = ['departments', 'department-detail', 'admin-faculty-list', 'principal-student-affairs', 'principal-faculty-management', 'student-details', 'student-syllabus', 'student-academic-timetable', 'student-exam-timetable', 'timetable', 'student-registration', 'hod-registration', 'faculty-registration']
+    const subPages = ['departments', 'department-detail', 'admin-faculty-list', 'principal-student-affairs', 'principal-faculty-management', 'student-details', 'student-syllabus', 'student-academic-timetable', 'student-exam-timetable', 'student-adjusted-timetable', 'principal-adjusted-timetable', 'timetable', 'student-registration', 'hod-registration', 'faculty-registration']
 
     if (screen === 'role-selection') return pageTransitions.fade
     if (logins.includes(screen)) return pageTransitions.slideUp
@@ -136,6 +139,7 @@ export default function App() {
     else if (page === 'syllabus') setCurrentScreen('student-syllabus')
     else if (page === 'academic-timetable') setCurrentScreen('student-academic-timetable')
     else if (page === 'exam-timetable') setCurrentScreen('student-exam-timetable')
+    else if (page === 'adjusted-timetable') setCurrentScreen('student-adjusted-timetable')
   }
 
   const handleNavigation = (page: string) => {
@@ -143,6 +147,7 @@ export default function App() {
     else if (page === 'timetable') setCurrentScreen('timetable')
     else if (page === 'student-affairs') setCurrentScreen('principal-student-affairs')
     else if (page === 'faculty-management') setCurrentScreen('principal-faculty-management')
+    else if (page === 'adjusted-timetable') setCurrentScreen('principal-adjusted-timetable')
   }
 
   const handleDepartmentClick = (department: any) => {
@@ -172,6 +177,7 @@ export default function App() {
       case 'timetable':
       case 'principal-student-affairs':
       case 'principal-faculty-management':
+      case 'principal-adjusted-timetable':
         setCurrentScreen('principal-dashboard')
         break
       case 'department-detail':
@@ -184,6 +190,7 @@ export default function App() {
       case 'student-syllabus':
       case 'student-academic-timetable':
       case 'student-exam-timetable':
+      case 'student-adjusted-timetable':
         setCurrentScreen('student-dashboard')
         break
       case 'faculty-registration':
@@ -234,6 +241,8 @@ export default function App() {
         return <StudentTimetablePage onBack={handleBack} type="academic" />
       case 'student-exam-timetable':
         return <StudentTimetablePage onBack={handleBack} type="exam" />
+      case 'student-adjusted-timetable':
+        return <AdjustedTimetablePage onBack={handleBack} fetchFn={apiGetStudentAdjustedTimetable} role="student" />
       case 'hod-main-dashboard':
         return <HODMainDashboard onBack={handleBack} />
       case 'faculty-dashboard':
@@ -244,6 +253,8 @@ export default function App() {
         return <PrincipalStudentAffairs onBack={handleBack} />
       case 'principal-faculty-management':
         return <FacultyListPage onBack={handleBack} userRole="principal" />
+      case 'principal-adjusted-timetable':
+        return <AdjustedTimetablePage onBack={handleBack} fetchFn={apiGetPrincipalAdjustedTimetable} role="principal" />
       case 'departments':
         return <DepartmentsPage onBack={handleBack} onDepartmentClick={handleDepartmentClick} />
       case 'department-detail':

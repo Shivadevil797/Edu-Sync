@@ -15,5 +15,6 @@ router.get('/syllabus', hod.getSyllabi);
 router.get('/leave-requests', hod.getLeaveRequests);
 router.put('/leave-requests/:id', hod.reviewLeaveRequest);
 router.post('/leave-request', hod.requestLeave);
+router.get('/adjusted-timetable', hod.getAdjustedTimetable);
 
 module.exports = router;

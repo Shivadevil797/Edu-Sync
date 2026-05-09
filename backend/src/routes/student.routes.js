@@ -9,5 +9,6 @@ router.put('/profile', student.updateProfile);
 router.get('/timetable/academic', student.getAcademicTimetable);
 router.get('/timetable/exam', student.getExamTimetable);
 router.get('/syllabus', student.getSyllabus);
+router.get('/timetable/adjusted', student.getAdjustedTimetable);
 
 module.exports = router;

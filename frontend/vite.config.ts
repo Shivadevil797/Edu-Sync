@@ -12,13 +12,13 @@ const restructurePlugin = () => ({
       const componentsDir = path.resolve(__dirname, 'src/app/components');
       const appDir = path.resolve(__dirname, 'src/app');
       const fileGroups = {
-        admin: ['AdminDashboard.tsx', 'AdminLoginPage.tsx', 'AdministrationPage.tsx', 'CommitteeManagementPage.tsx'],
+        admin: ['AdminDashboard.tsx', 'AdminLoginPage.tsx', 'AdministrationPage.tsx', 'CommitteeManagementPage.tsx', 'TimetableManagementModal.tsx'],
         principal: ['PrincipalDashboard.tsx', 'ApprovalCenterPage.tsx'],
-        hod: ['HODDashboard.tsx', 'HODLeaveNotifications.tsx', 'HODLoginPage.tsx', 'HODMainDashboard.tsx', 'HODProfile.tsx'],
+        hod: ['HODDashboard.tsx', 'HODLeaveNotifications.tsx', 'HODLoginPage.tsx', 'HODMainDashboard.tsx', 'HODProfile.tsx', 'HODRegistrationPage.tsx'],
         faculty: ['FacultyDashboard.tsx', 'FacultyDetails.tsx', 'FacultyHODRegistrationPage.tsx', 'FacultyListPage.tsx', 'FacultyLoginPage.tsx', 'FacultyManagementPage.tsx', 'FacultyNewUserRegistrationPage.tsx', 'FacultyRegistrationPage.tsx', 'FacultyTimetablePage.tsx'],
         student: ['StudentAttendancePage.tsx', 'StudentCommitteesPage.tsx', 'StudentDashboard.tsx', 'StudentDetailPage.tsx', 'StudentExamPage.tsx', 'StudentFeePage.tsx', 'StudentLoginPage.tsx', 'StudentManagementPage.tsx', 'StudentNewUserRegistrationPage.tsx', 'StudentRegistrationPage.tsx', 'StudentSyllabusPage.tsx', 'StudentTimetablePage.tsx'],
         department: ['DepartmentDetailPage.tsx', 'DepartmentFacultyPage.tsx', 'DepartmentSelection.tsx', 'DepartmentStudentsPage.tsx', 'DepartmentSyllabusPage.tsx', 'DepartmentTimetablePage.tsx', 'DepartmentsPage.tsx'],
-        common: ['AvatarDropdown.tsx', 'CredentialPreviewPage.tsx', 'InvalidRolePage.tsx', 'LeaveRequestForm.tsx', 'LeaveRequestList.tsx', 'LoginForm.tsx', 'LoginPage.tsx', 'NewCandidateRegistrationPage.tsx', 'ReportsAnalyticsPage.tsx', 'RoleSelection.tsx', 'Timetable.tsx', 'UnifiedTimetable.tsx']
+        common: ['AccessGate.tsx', 'AdjustedTimetablePage.tsx', 'AvatarDropdown.tsx', 'CredentialPreviewPage.tsx', 'ErrorBoundary.tsx', 'InvalidRolePage.tsx', 'LeaveRequestForm.tsx', 'LeaveRequestList.tsx', 'LoginForm.tsx', 'LoginPage.tsx', 'NewCandidateRegistrationPage.tsx', 'ReportsAnalyticsPage.tsx', 'RoleSelection.tsx', 'Timetable.tsx', 'UnifiedTimetable.tsx'],
       };
       
       const componentPathMap = {};

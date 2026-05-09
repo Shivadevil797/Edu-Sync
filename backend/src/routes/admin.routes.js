@@ -28,5 +28,6 @@ router.get('/timetable/workloads', admin.getWorkloads);
 router.get('/timetable', admin.getTimetables);
 router.put('/timetable/:id', admin.updateTimetable);
 router.post('/timetable/:id/publish', admin.publishTimetable);
+router.delete('/timetable/:id', admin.deleteTimetable);
 
 module.exports = router;

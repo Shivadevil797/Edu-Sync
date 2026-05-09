@@ -14,6 +14,7 @@ import {
   BookOpen,
   ChevronRight,
   Quote,
+  ArrowRightLeft,
 } from 'lucide-react'
 
 interface PrincipalDashboardProps {
@@ -63,6 +64,7 @@ export function PrincipalDashboard({ onBack, onNavigate }: PrincipalDashboardPro
     { id: 'faculty', title: 'Faculty Management', description: 'Faculty profiles, recruitment & evaluation', icon: UserCheck, stats: '85 Faculty Members' },
     { id: 'students', title: 'Student Affairs', description: 'Student admissions, records & activities', icon: GraduationCap, stats: '1,200+ Students' },
     { id: 'academics', title: 'Academic Planning', description: 'Curriculum, timetables & academic calendar', icon: BookOpen, stats: '45 Courses' },
+    { id: 'adjusted-timetable', title: 'Adjusted Timetable', description: 'Schedule changes due to faculty leave', icon: ArrowRightLeft, stats: 'Live Updates' },
   ]
 
   return (
@@ -170,6 +172,7 @@ export function PrincipalDashboard({ onBack, onNavigate }: PrincipalDashboardPro
                       else if (option.id === 'academics') onNavigate('timetable')
                       else if (option.id === 'students') onNavigate('student-affairs')
                       else if (option.id === 'faculty') onNavigate('faculty-management')
+                      else if (option.id === 'adjusted-timetable') onNavigate('adjusted-timetable')
                     }
                   }}
                 >

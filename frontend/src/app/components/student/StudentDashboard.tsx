@@ -14,6 +14,7 @@ import {
   ClipboardList,
   Sparkles,
   ArrowRight,
+  ArrowRightLeft,
 } from 'lucide-react'
 
 import { getUser } from '@/services/api'
@@ -86,6 +87,16 @@ export function StudentDashboard({ onBack, onNavigate }: StudentDashboardProps) 
       bgLight: 'bg-amber-50',
       iconColor: 'text-amber-600',
       borderColor: 'border-amber-200',
+    },
+    {
+      id: 'adjusted-timetable',
+      icon: ArrowRightLeft,
+      label: 'Adjusted Timetable',
+      description: 'Schedule changes due to faculty leave',
+      gradient: 'from-rose-500 to-red-600',
+      bgLight: 'bg-rose-50',
+      iconColor: 'text-rose-600',
+      borderColor: 'border-rose-200',
     },
   ]
 

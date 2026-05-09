@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { X, Upload, FileSpreadsheet, CheckCircle, AlertCircle, Clock, Filter, ChevronDown } from 'lucide-react'
+import { X, Upload, FileSpreadsheet, CheckCircle, AlertCircle, Clock, Filter, ChevronDown, Trash2 } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
-import { apiUploadWorkload, apiGetTimetables, apiGetWorkloads } from '@/services/api'
+import { apiUploadWorkload, apiGetTimetables, apiGetWorkloads, apiDeleteTimetable } from '@/services/api'
 
 interface TimetableManagementModalProps {
   onClose: () => void
@@ -33,6 +33,7 @@ export function TimetableManagementModal({ onClose }: TimetableManagementModalPr
   const [filterDept, setFilterDept] = useState('')
   const [isLoadingTT, setIsLoadingTT] = useState(false)
   const [isLoadingWL, setIsLoadingWL] = useState(false)
+  const [isDeletingTT, setIsDeletingTT] = useState<string | null>(null)
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -263,9 +264,35 @@ export function TimetableManagementModal({ onClose }: TimetableManagementModalPr
                           <h5 className="font-semibold text-gray-900">
                             {selectedTimetable.department || selectedTimetable.departmentId?.name} — Year {selectedTimetable.year}, Section {selectedTimetable.section}
                           </h5>
-                          <span className={`text-xs px-2 py-1 rounded-full ${selectedTimetable.isPublished ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                            {selectedTimetable.isPublished ? 'Published' : 'Draft'}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs px-2 py-1 rounded-full ${selectedTimetable.isPublished ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                              {selectedTimetable.isPublished ? 'Published' : 'Draft'}
+                            </span>
+                            <button
+                              onClick={async () => {
+                                if (!window.confirm(`Delete timetable for ${selectedTimetable.department || selectedTimetable.departmentId?.name} — Year ${selectedTimetable.year}, Section ${selectedTimetable.section}? This cannot be undone.`)) return
+                                setIsDeletingTT(selectedTimetable._id)
+                                try {
+                                  await apiDeleteTimetable(selectedTimetable._id)
+                                  setSelectedTimetable(null)
+                                  loadTimetables()
+                                } catch (err: any) {
+                                  alert(err.message || 'Failed to delete timetable')
+                                } finally {
+                                  setIsDeletingTT(null)
+                                }
+                              }}
+                              disabled={isDeletingTT === selectedTimetable._id}
+                              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
+                            >
+                              {isDeletingTT === selectedTimetable._id ? (
+                                <div className="w-3.5 h-3.5 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
+                              ) : (
+                                <Trash2 className="w-3.5 h-3.5" />
+                              )}
+                              Delete
+                            </button>
+                          </div>
                         </div>
                         <div className="overflow-x-auto">
                           <table className="w-full text-xs border-collapse">

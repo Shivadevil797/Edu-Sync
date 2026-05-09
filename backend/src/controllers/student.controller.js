@@ -1,6 +1,7 @@
 const Student = require('../models/Student');
 const Timetable = require('../models/Timetable');
 const Syllabus = require('../models/Syllabus');
+const AdjustedTimetable = require('../models/AdjustedTimetable');
 const { sendSuccess, sendError } = require('../utils/response');
 
 exports.getProfile = async (req, res) => {
@@ -80,5 +81,44 @@ exports.getSyllabus = async (req, res) => {
     if (!student) return sendError(res, 'Student not found', 404);
     const syllabi = await Syllabus.find({ departmentId: student.departmentId }).sort({ createdAt: -1 }).lean();
     sendSuccess(res, { syllabi });
+  } catch (err) { sendError(res, err.message); }
+};
+
+exports.getAdjustedTimetable = async (req, res) => {
+  try {
+    const student = await Student.findOne({ userId: req.user._id });
+    if (!student) return sendError(res, 'Student not found', 404);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const yearInCourse = student.semester ? Math.ceil(student.semester / 2) : 1;
+
+    // Try exact match first (dept + year + section)
+    let adjustedTimetables = await AdjustedTimetable.find({
+      departmentId: student.departmentId,
+      year: yearInCourse,
+      section: student.section || 'A',
+      date: { $gte: today },
+    }).populate('departmentId', 'name fullName').sort({ date: 1 }).lean();
+
+    // Fallback: dept + year only
+    if (adjustedTimetables.length === 0) {
+      adjustedTimetables = await AdjustedTimetable.find({
+        departmentId: student.departmentId,
+        year: yearInCourse,
+        date: { $gte: today },
+      }).populate('departmentId', 'name fullName').sort({ date: 1 }).lean();
+    }
+
+    // Fallback: dept only
+    if (adjustedTimetables.length === 0) {
+      adjustedTimetables = await AdjustedTimetable.find({
+        departmentId: student.departmentId,
+        date: { $gte: today },
+      }).populate('departmentId', 'name fullName').sort({ date: 1 }).lean();
+    }
+
+    sendSuccess(res, { adjustedTimetables });
   } catch (err) { sendError(res, err.message); }
 };

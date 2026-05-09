@@ -3,6 +3,7 @@ const Student = require('../models/Student');
 const Timetable = require('../models/Timetable');
 const Syllabus = require('../models/Syllabus');
 const LeaveRequest = require('../models/LeaveRequest');
+const AdjustedTimetable = require('../models/AdjustedTimetable');
 const { sendSuccess, sendError } = require('../utils/response');
 const { applyLeaveToTimetable, removeLeaveFromTimetable } = require('../services/leave.service');
 
@@ -134,5 +135,22 @@ exports.requestLeave = async (req, res) => {
       approverRole: 'principal',
     });
     sendSuccess(res, { message: 'Leave request submitted', leaveRequest: leave }, 201);
+  } catch (err) { sendError(res, err.message); }
+};
+
+exports.getAdjustedTimetable = async (req, res) => {
+  try {
+    const hodFaculty = await Faculty.findOne({ userId: req.user._id });
+    if (!hodFaculty) return sendError(res, 'HOD profile not found', 404);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const adjustedTimetables = await AdjustedTimetable.find({
+      departmentId: hodFaculty.departmentId,
+      date: { $gte: today },
+    }).populate('departmentId', 'name fullName').sort({ date: 1 }).lean();
+
+    sendSuccess(res, { adjustedTimetables });
   } catch (err) { sendError(res, err.message); }
 };
