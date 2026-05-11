@@ -2,8 +2,19 @@ const router = require('express').Router();
 const hod = require('../controllers/hod.controller');
 const { authenticate, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const Faculty = require('../models/Faculty');
 
-router.use(authenticate, authorize('hod'));
+// Allow both 'hod' and 'faculty' User roles, then verify isHOD flag
+router.use(authenticate, authorize('hod', 'faculty'));
+router.use(async (req, res, next) => {
+  try {
+    const faculty = await Faculty.findOne({ userId: req.user._id });
+    if (!faculty || (!faculty.isHOD && req.user.role !== 'hod')) {
+      return res.status(403).json({ success: false, message: 'HOD access required' });
+    }
+    next();
+  } catch { next(); }
+});
 
 router.get('/dashboard', hod.getDashboard);
 router.get('/faculty', hod.getFaculty);

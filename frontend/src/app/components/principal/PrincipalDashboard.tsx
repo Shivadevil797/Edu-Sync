@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Quote,
   ArrowRightLeft,
+  CalendarCheck,
 } from 'lucide-react'
 
 interface PrincipalDashboardProps {
@@ -63,6 +64,7 @@ export function PrincipalDashboard({ onBack, onNavigate }: PrincipalDashboardPro
     { id: 'departments', title: 'Departments', description: 'View and manage all academic departments', icon: Building, stats: '9 Departments' },
     { id: 'faculty', title: 'Faculty Management', description: 'Faculty profiles, recruitment & evaluation', icon: UserCheck, stats: '85 Faculty Members' },
     { id: 'students', title: 'Student Affairs', description: 'Student admissions, records & activities', icon: GraduationCap, stats: '1,200+ Students' },
+    { id: 'leave-requests', title: 'HOD Leave Requests', description: 'Review and approve/reject HOD leave applications', icon: CalendarCheck, stats: 'Pending Reviews' },
     { id: 'academics', title: 'Academic Planning', description: 'Curriculum, timetables & academic calendar', icon: BookOpen, stats: '45 Courses' },
     { id: 'adjusted-timetable', title: 'Adjusted Timetable', description: 'Schedule changes due to faculty leave', icon: ArrowRightLeft, stats: 'Live Updates' },
   ]
@@ -172,6 +174,7 @@ export function PrincipalDashboard({ onBack, onNavigate }: PrincipalDashboardPro
                       else if (option.id === 'academics') onNavigate('timetable')
                       else if (option.id === 'students') onNavigate('student-affairs')
                       else if (option.id === 'faculty') onNavigate('faculty-management')
+                      else if (option.id === 'leave-requests') onNavigate('leave-requests')
                       else if (option.id === 'adjusted-timetable') onNavigate('adjusted-timetable')
                     }
                   }}

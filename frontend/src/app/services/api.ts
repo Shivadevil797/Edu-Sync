@@ -372,6 +372,13 @@ export async function apiDeleteStaff(facultyId: string, reason?: string) {
   });
 }
 
+export async function apiResetFacultyPassword(facultyId: string, newPassword?: string) {
+  return apiFetch(`/admin/staff/${facultyId}/reset-password`, {
+    method: 'PUT',
+    body: JSON.stringify({ newPassword }),
+  });
+}
+
 // ─── Principal Students API ───
 
 export async function apiGetPrincipalStudents(params?: {
@@ -389,6 +396,19 @@ export async function apiGetPrincipalStudents(params?: {
 
 export async function apiGetPrincipalFaculty() {
   return apiFetch('/principal/faculty');
+}
+
+// ─── Principal Leave API ───
+
+export async function apiGetPrincipalLeaveRequests() {
+  return apiFetch('/principal/leave-requests');
+}
+
+export async function apiReviewPrincipalLeave(leaveId: string, status: 'approved' | 'rejected') {
+  return apiFetch(`/principal/leave-requests/${leaveId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ status }),
+  });
 }
 
 // ─── Adjusted Timetable API ───

@@ -116,22 +116,29 @@ exports.deleteStaff = async (req, res) => {
     const faculty = await Faculty.findById(req.params.id);
     if (!faculty) return sendError(res, 'Staff not found', 404);
 
-    // Soft-delete: mark as terminated, deactivate user account
-    faculty.isTerminated = true;
-    faculty.terminatedAt = new Date();
-    faculty.terminationReason = req.body.reason || 'Removed by admin';
-    await faculty.save();
-
-    await User.findByIdAndUpdate(faculty.userId, { isActive: false });
+    // If this faculty was HOD, clear the department's hodId
+    if (faculty.isHOD && faculty.departmentId) {
+      await Department.findByIdAndUpdate(faculty.departmentId, { $unset: { hodId: 1 } });
+    }
 
     // Update department faculty count
     const dept = await Department.findById(faculty.departmentId);
+
+    // Permanently delete the User account (frees up the email/username)
+    if (faculty.userId) {
+      await User.findByIdAndDelete(faculty.userId);
+    }
+
+    // Permanently delete the Faculty record
+    await Faculty.findByIdAndDelete(faculty._id);
+
+    // Update department count
     if (dept) {
       dept.totalFaculty = await Faculty.countDocuments({ departmentId: dept._id, isTerminated: { $ne: true } });
       await dept.save();
     }
 
-    sendSuccess(res, { message: 'Staff moved to Ex-Employees' });
+    sendSuccess(res, { message: 'Staff permanently deleted' });
   } catch (err) { sendError(res, err.message); }
 };
 
@@ -284,4 +291,27 @@ exports.deleteTimetable = async (req, res) => {
 exports.getProfile = async (req, res) => {
   try { sendSuccess(res, { user: req.user }); }
   catch (err) { sendError(res, err.message); }
+};
+
+// PUT /api/v1/admin/staff/:id/reset-password — Admin resets a user's password
+exports.resetPassword = async (req, res) => {
+  try {
+    const faculty = await Faculty.findById(req.params.id);
+    if (!faculty) return sendError(res, 'Faculty not found', 404);
+
+    const user = await User.findById(faculty.userId).select('+passwordPlain');
+    if (!user) return sendError(res, 'User account not found', 404);
+
+    // Generate new password or use one provided by admin
+    const newPassword = req.body.newPassword || generatePassword(faculty.fullName);
+
+    user.passwordHash = newPassword; // pre-save hook will hash it
+    user.passwordPlain = encrypt(newPassword);
+    await user.save();
+
+    sendSuccess(res, {
+      message: 'Password reset successfully',
+      credentials: { username: user.username, password: newPassword },
+    });
+  } catch (err) { sendError(res, err.message); }
 };

@@ -2,6 +2,7 @@ const Timetable = require('../models/Timetable');
 const LeaveRequest = require('../models/LeaveRequest');
 const AdjustedTimetable = require('../models/AdjustedTimetable');
 const Faculty = require('../models/Faculty');
+const Department = require('../models/Department');
 
 // When a leave is approved, mark affected timetable slots as on-leave
 // AND generate adjusted timetables with substitute faculty
@@ -24,6 +25,8 @@ async function applyLeaveToTimetable(leaveRequest, facultyDoc) {
     }
     current.setDate(current.getDate() + 1);
   }
+
+  if (leaveDates.length === 0) return;
 
   // Find timetables that have this faculty's slots on leave days
   const timetables = await Timetable.find({
@@ -57,6 +60,44 @@ async function applyLeaveToTimetable(leaveRequest, facultyDoc) {
   // ─── Generate Adjusted Timetables ───
   // Remove any previous adjusted timetables for this leave request
   await AdjustedTimetable.deleteMany({ leaveRequestId: leaveRequest._id });
+
+  // Get department name for the record
+  let deptName = '';
+  if (facultyDoc.departmentId) {
+    const dept = await Department.findById(facultyDoc.departmentId).lean();
+    if (dept) deptName = dept.name || dept.fullName || '';
+  }
+
+  // If no master timetable has faculty's slots, still create a basic adjusted entry
+  // so the leave is visible in the adjusted timetable page
+  if (timetables.length === 0) {
+    for (const { date, dayName } of leaveDates) {
+      await AdjustedTimetable.create({
+        leaveRequestId: leaveRequest._id,
+        originalTimetableId: null,
+        absentFacultyId: facultyDoc._id,
+        absentFacultyName: facultyDoc.fullName,
+        departmentId: facultyDoc.departmentId,
+        date,
+        dayOfWeek: dayName,
+        year: null,
+        section: null,
+        leaveType: leaveRequest.leaveType,
+        leaveReason: leaveRequest.reason,
+        adjustedSlots: [{
+          period: 1,
+          subject: 'All classes',
+          originalFacultyId: facultyDoc._id,
+          originalFacultyName: facultyDoc.fullName,
+          substituteFacultyId: null,
+          substituteFacultyName: null,
+          type: 'theory',
+          status: 'cancelled',
+        }],
+      });
+    }
+    return affectedSlotIds;
+  }
 
   // Get all department faculty (excluding the absent one and terminated ones)
   const deptFaculty = await Faculty.find({

@@ -13,7 +13,7 @@ const restructurePlugin = () => ({
       const appDir = path.resolve(__dirname, 'src/app');
       const fileGroups = {
         admin: ['AdminDashboard.tsx', 'AdminLoginPage.tsx', 'AdministrationPage.tsx', 'CommitteeManagementPage.tsx', 'TimetableManagementModal.tsx'],
-        principal: ['PrincipalDashboard.tsx', 'ApprovalCenterPage.tsx'],
+        principal: ['PrincipalDashboard.tsx', 'ApprovalCenterPage.tsx', 'PrincipalLeaveReviewPage.tsx', 'PrincipalStudentAffairs.tsx'],
         hod: ['HODDashboard.tsx', 'HODLeaveNotifications.tsx', 'HODLoginPage.tsx', 'HODMainDashboard.tsx', 'HODProfile.tsx', 'HODRegistrationPage.tsx'],
         faculty: ['FacultyDashboard.tsx', 'FacultyDetails.tsx', 'FacultyHODRegistrationPage.tsx', 'FacultyListPage.tsx', 'FacultyLoginPage.tsx', 'FacultyManagementPage.tsx', 'FacultyNewUserRegistrationPage.tsx', 'FacultyRegistrationPage.tsx', 'FacultyTimetablePage.tsx'],
         student: ['StudentAttendancePage.tsx', 'StudentCommitteesPage.tsx', 'StudentDashboard.tsx', 'StudentDetailPage.tsx', 'StudentExamPage.tsx', 'StudentFeePage.tsx', 'StudentLoginPage.tsx', 'StudentManagementPage.tsx', 'StudentNewUserRegistrationPage.tsx', 'StudentRegistrationPage.tsx', 'StudentSyllabusPage.tsx', 'StudentTimetablePage.tsx'],

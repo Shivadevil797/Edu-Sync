@@ -45,10 +45,28 @@ async function parseWorkloadFile(filePath) {
     });
   }
 
-  if (ext === '.xlsx' || ext === '.xls') {
+  if (ext === '.xls') {
+    // Legacy binary Excel — use SheetJS
+    const XLSX = require('xlsx');
+    const wb = XLSX.readFile(filePath);
+    const sheetName = wb.SheetNames[0];
+    if (!sheetName) throw new Error('Excel file has no sheets');
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
+    for (const row of rows) {
+      const normalized = {};
+      for (const [key, val] of Object.entries(row)) {
+        normalized[key.trim().toLowerCase()] = String(val || '').trim();
+      }
+      records.push(normalizeWorkloadRow(normalized));
+    }
+    return records;
+  }
+
+  if (ext === '.xlsx') {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
     const sheet = workbook.worksheets[0];
+    if (!sheet) throw new Error('Excel file has no sheets');
     const headers = [];
     sheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) {
@@ -141,10 +159,35 @@ async function generateTimetables(workloadDoc, userId) {
     const labTasks = [];    // { subject, teacherName, facultyId, hours }
 
     for (const teacher of group.teachers) {
-      const facultyDoc = await Faculty.findOne({
-        fullName: { $regex: new RegExp(teacher.teacherName, 'i') },
+      // Escape regex special chars in name
+      const escapedName = teacher.teacherName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const notTerminated = { isTerminated: { $ne: true } };
+
+      // Try exact match first, then contains, then match by individual name parts
+      let facultyDoc = await Faculty.findOne({
+        fullName: { $regex: new RegExp(`^${escapedName}$`, 'i') },
         departmentId: dept._id,
+        ...notTerminated,
       });
+      if (!facultyDoc) {
+        facultyDoc = await Faculty.findOne({
+          fullName: { $regex: new RegExp(escapedName, 'i') },
+          departmentId: dept._id,
+          ...notTerminated,
+        });
+      }
+      if (!facultyDoc) {
+        // Try matching by individual name parts (handles "Ravikumar G" vs "G Ravikumar")
+        const nameParts = teacher.teacherName.split(/\s+/).filter(p => p.length > 1);
+        if (nameParts.length > 0) {
+          const partRegex = nameParts.map(p => `(?=.*${p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`).join('');
+          facultyDoc = await Faculty.findOne({
+            fullName: { $regex: new RegExp(partRegex, 'i') },
+            departmentId: dept._id,
+            ...notTerminated,
+          });
+        }
+      }
       const facId = facultyDoc?._id || null;
 
       // Separate theory subjects from lab subjects
