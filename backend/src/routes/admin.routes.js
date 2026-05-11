@@ -15,6 +15,7 @@ router.post('/staff/bulk-import', upload.single('file'), admin.bulkImportStaff);
 router.get('/staff/ex-employees', admin.getExEmployees);
 router.put('/staff/:id', admin.updateStaff);
 router.delete('/staff/:id', admin.deleteStaff);
+router.put('/staff/:id/reset-password', admin.resetPassword);
 
 // Student management
 router.get('/students', admin.getStudents);

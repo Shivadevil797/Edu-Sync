@@ -25,10 +25,28 @@ async function parseStaffFile(filePath) {
     });
   }
 
-  if (ext === '.xlsx' || ext === '.xls') {
+  if (ext === '.xls') {
+    // Legacy binary Excel — use SheetJS
+    const XLSX = require('xlsx');
+    const wb = XLSX.readFile(filePath);
+    const sheetName = wb.SheetNames[0];
+    if (!sheetName) throw new Error('Excel file has no sheets');
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
+    for (const row of rows) {
+      const normalized = {};
+      for (const [key, val] of Object.entries(row)) {
+        normalized[key.trim().toLowerCase()] = String(val || '').trim();
+      }
+      records.push(normalizeRow(normalized));
+    }
+    return records;
+  }
+
+  if (ext === '.xlsx') {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
     const sheet = workbook.worksheets[0];
+    if (!sheet) throw new Error('Excel file has no sheets');
     const headers = [];
     sheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) {
