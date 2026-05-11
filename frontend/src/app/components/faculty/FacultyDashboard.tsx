@@ -430,7 +430,7 @@ export function FacultyDashboard({ onBack }: FacultyDashboardProps) {
                     <div className="flex items-center gap-2 text-white">
                       <UserX className="w-5 h-5" />
                       <span className="font-semibold">{item.absentFacultyName} is on leave</span>
-                      <Badge className="bg-white/20 text-white ml-auto text-xs">{item.leaveType || 'Leave'}</Badge>
+                      <span className="bg-white/20 text-white ml-auto text-xs px-2 py-0.5 rounded-full">{item.leaveType || 'Leave'}</span>
                     </div>
                   </div>
                   <CardContent className="p-0">

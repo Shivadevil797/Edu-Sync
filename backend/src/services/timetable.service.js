@@ -161,16 +161,19 @@ async function generateTimetables(workloadDoc, userId) {
     for (const teacher of group.teachers) {
       // Escape regex special chars in name
       const escapedName = teacher.teacherName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const notTerminated = { isTerminated: { $ne: true } };
 
       // Try exact match first, then contains, then match by individual name parts
       let facultyDoc = await Faculty.findOne({
         fullName: { $regex: new RegExp(`^${escapedName}$`, 'i') },
         departmentId: dept._id,
+        ...notTerminated,
       });
       if (!facultyDoc) {
         facultyDoc = await Faculty.findOne({
           fullName: { $regex: new RegExp(escapedName, 'i') },
           departmentId: dept._id,
+          ...notTerminated,
         });
       }
       if (!facultyDoc) {
@@ -181,6 +184,7 @@ async function generateTimetables(workloadDoc, userId) {
           facultyDoc = await Faculty.findOne({
             fullName: { $regex: new RegExp(partRegex, 'i') },
             departmentId: dept._id,
+            ...notTerminated,
           });
         }
       }
